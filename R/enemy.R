@@ -604,14 +604,14 @@ check_missile_spawn <- function(mo) {
 spawn_player_missile <- function(world, source, typ, game) {
   info <- MOBJINFO[[typ + 1L]]
   speed <- info$speed
-  ang <- source$angle
-  slope <- bullet_slope(world, source)
+  aim <- bullet_aim(world, source, MISSILERANGE)
+  ang <- aim$angle
   mo <- spawn_mobj(world, source$x, source$y, source$z + 32 * FRACUNIT, typ, game)
   mo$target <- source
   mo$angle <- ang
   mo$momx <- fixed_mul(speed, fine_cos(ang))
   mo$momy <- fixed_mul(speed, fine_sin(ang))
-  mo$momz <- fixed_mul(speed, slope)
+  mo$momz <- fixed_mul(speed, aim$slope)
   check_missile_spawn(mo)
   mo
 }

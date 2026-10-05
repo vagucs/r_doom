@@ -251,8 +251,10 @@ pit_line <- function(tm, chk, ld) {
       bbox[BOXBOTTOM + 1L] >= ld$bbox[BOXTOP + 1L]) return(TRUE)
   if (box_on_line_side(bbox, ld) != -1L) return(TRUE)
   if (is.null(ld$backsector)) return(FALSE)
-  if (has_flag(ld$flags, ML_BLOCKING)) return(FALSE)
-  if (is.null(tm$player) && has_flag(ld$flags, 2L)) return(FALSE)
+  if (!has_flag(tm$flags, MF_MISSILE)) {
+    if (has_flag(ld$flags, ML_BLOCKING)) return(FALSE)
+    if (is.null(tm$player) && has_flag(ld$flags, 2L)) return(FALSE)
+  }
   open <- line_opening(ld)
   if (open[1] < chk$ceilingz) {
     chk$ceilingz <- open[1]
@@ -388,7 +390,14 @@ change_sector <- function(world, sector, crush) {
 approx_distance <- function(dx, dy) {
   dx <- abs(dx)
   dy <- abs(dy)
-  if (dy > dx) dx + shar(dy, 1L) else dy + shar(dx, 1L)
+  if (dx < dy) {
+    big <- dy
+    small <- dx
+  } else {
+    big <- dx
+    small <- dy
+  }
+  big + shar(small, 1L)
 }
 
 angle_to <- function(x1, y1, x2, y2) {
@@ -745,15 +754,16 @@ aim_slope <- function(world, source, angle, attackrange) {
   aim_shot(world, source, angle, attackrange)$slope
 }
 
-bullet_slope <- function(world, source) {
+bullet_aim <- function(world, source, span = 16 * 64 * FRACUNIT) {
   base <- source$angle
-  span <- 16 * 64 * FRACUNIT
   for (ang in c(base, as_u32(base + 67108864), as_u32(base - 67108864))) {
     hit <- aim_shot(world, source, ang, span)
-    if (!is.null(hit$target)) return(hit$slope)
+    if (!is.null(hit$target)) return(list(slope = hit$slope, angle = ang, target = hit$target))
   }
-  0
+  list(slope = 0, angle = base, target = NULL)
 }
+
+bullet_slope <- function(world, source) bullet_aim(world, source)$slope
 
 spawn_fx <- function(world, x, y, z, sprite) {
   mo <- new.env(parent = emptyenv())
