@@ -1,5 +1,7 @@
 # r_doom
 
+**Video:** [DOOM running in R](https://youtu.be/hEJqkEXS944)
+
 DOOM generic ported from **[python_doom](https://github.com/vagucs/python_doom)** to **R 4.6 + SDL2**.
 
 By **Wagner Nunes da Silva**
