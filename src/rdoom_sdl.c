@@ -1,5 +1,16 @@
-/* Ponte R -> SDL2. Janela, paleta, textura, teclado e fila de audio.
-   Nada de BSP, coluna, span, thinker ou qualquer logica do DOOM. */
+/* DOOM generic portado do python_doom para R com SDL2.
+ *
+ * Por Wagner Nunes da Silva
+ *
+ * vagucs@bol.com.br
+ * vagucs@vagucs.com.br
+ * vagucs@gmail.com
+ *
+ * www.vagucs.com.br
+ *
+ * Ponte R -> SDL2. Janela, paleta, textura, teclado e fila de audio.
+ * Nada de BSP, coluna, span, thinker ou qualquer logica do DOOM.
+ */
 
 #define R_NO_REMAP
 #include <R.h>
@@ -122,6 +133,7 @@ static int name_of(SDL_Keycode sym, char *out, int n) {
     return 1;
   }
   switch (sym) {
+  case SDLK_TAB: s = "tab"; break;
   case SDLK_ESCAPE: s = "escape"; break;
   case SDLK_RETURN:
   case SDLK_KP_ENTER: s = "return"; break;

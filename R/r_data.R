@@ -1,3 +1,13 @@
+# DOOM generic portado do python_doom para R com SDL2.
+#
+# Por Wagner Nunes da Silva
+#
+# vagucs@bol.com.br
+# vagucs@vagucs.com.br
+# vagucs@gmail.com
+#
+# www.vagucs.com.br
+#
 # Texturas, flats e COLORMAP (r_data). O patch da abertura e a mesma
 # coluna de posts: topo, tamanho, pixels, fim em 255.
 

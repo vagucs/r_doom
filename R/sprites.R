@@ -1,3 +1,13 @@
+# DOOM generic portado do python_doom para R com SDL2.
+#
+# Por Wagner Nunes da Silva
+#
+# vagucs@bol.com.br
+# vagucs@vagucs.com.br
+# vagucs@gmail.com
+#
+# www.vagucs.com.br
+#
 # Sprites do WAD (S_START..S_END) e desenho no framebuffer.
 
 MAX_SPRITE_FRAMES <- 29L

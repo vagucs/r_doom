@@ -1,3 +1,13 @@
+# DOOM generic portado do python_doom para R com SDL2.
+#
+# Por Wagner Nunes da Silva
+#
+# vagucs@bol.com.br
+# vagucs@vagucs.com.br
+# vagucs@gmail.com
+#
+# www.vagucs.com.br
+#
 # Intermissao de um jogador. Contagem, mapa e entrada da fase seguinte.
 
 WI_TITLEY <- 2L

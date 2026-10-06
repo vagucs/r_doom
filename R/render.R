@@ -1,3 +1,13 @@
+# DOOM generic portado do python_doom para R com SDL2.
+#
+# Por Wagner Nunes da Silva
+#
+# vagucs@bol.com.br
+# vagucs@vagucs.com.br
+# vagucs@gmail.com
+#
+# www.vagucs.com.br
+#
 # Vista: BSP, paredes, chao, teto e ceu. Sprites entram depois, em sprites.R.
 
 renderer_new <- function(res) {

@@ -1,3 +1,15 @@
+# DOOM generic portado do python_doom para R com SDL2.
+#
+# Por Wagner Nunes da Silva
+#
+# vagucs@bol.com.br
+# vagucs@vagucs.com.br
+# vagucs@gmail.com
+#
+# www.vagucs.com.br
+#
+# Tabela de spawn dos things, a partir do python_doom.
+
 SPAWNINFO <- list(
   list(doomed = 3004L, sprite = "POSS", frame = 0L, radius = 1310720, height = 3670016, flags = 4194310),
   list(doomed = 9L, sprite = "SPOS", frame = 0L, radius = 1310720, height = 3670016, flags = 4194310),

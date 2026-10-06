@@ -1,3 +1,13 @@
+# DOOM generic portado do python_doom para R com SDL2.
+#
+# Por Wagner Nunes da Silva
+#
+# vagucs@bol.com.br
+# vagucs@vagucs.com.br
+# vagucs@gmail.com
+#
+# www.vagucs.com.br
+#
 # Arranque: acha o IWAD, desenha o TITLEPIC e segura a janela.
 
 find_iwad <- function(explicit = NULL) {
@@ -106,6 +116,8 @@ compose_frame <- function(game) {
     game$video$fb <- raw(SCREENPIXELS)
     game$video$fb <- menu_write_text(game$menu, game$video$fb, 48L, 80L, "FIM DO EPISODIO")$fb
     game$video$fb <- menu_write_text(game$menu, game$video$fb, 16L, 100L, "ENTER VOLTA AO TITULO")$fb
+  } else if (identical(game$gamestate, GS_LEVEL) && !is.null(game$am) && isTRUE(game$am$active)) {
+    game$video$fb <- am_draw(game)
   } else {
     game$video$fb <- game$base_fb
   }
@@ -168,6 +180,7 @@ start_level <- function(game, carry = FALSE) {
   game$view_sig <- ""
   game$need_view <- TRUE
   game$view_blocks <- NULL
+  am_reset(game$am)
   game$gamestate <- GS_LEVEL
   game$menu$dirty <- TRUE
   w <- game$world
@@ -189,6 +202,7 @@ return_to_title <- function(game) {
   game$st_palette <- 0L
   sound_play_title(game$sound)
   game$player <- NULL
+  if (!is.null(game$am)) game$am$active <- FALSE
   game$specials <- NULL
   game$world <- NULL
   game$wi <- NULL
@@ -374,6 +388,7 @@ apply_status_palette <- function(game) {
 
 present_level <- function(game) {
   if (!identical(game$gamestate, GS_LEVEL) || is.null(game$player)) return(FALSE)
+  if (!is.null(game$am) && isTRUE(game$am$active)) return(TRUE)
   sig <- view_signature(game)
   size_changed <- !identical(game$view_blocks, game$screen_size) ||
     !identical(as.integer(game$view_detail), as.integer(game$detail_level))
@@ -405,13 +420,20 @@ on_key <- function(game, down, key) {
     return(invisible(NULL))
   }
   if (down && (name == "minus" || name == "equals")) {
-    change_screen_size(game, if (name == "minus") -1L else 1L)
-    return(invisible(NULL))
-  }
-  if (down) {
+    if (!isTRUE(game$menu$active) && !is.null(game$am) && isTRUE(game$am$active)) {
+      am_responder(game, name)
+      game$menu$dirty <- TRUE
+    } else {
+      change_screen_size(game, if (name == "minus") -1L else 1L)
+    }
+  } else if (down) {
     if (!menu_responder(game$menu, name)) {
-      note_key(game, name)
-      feed_cheats(game, name)
+      if (!isTRUE(game$menu$active) && am_responder(game, name)) {
+        game$menu$dirty <- TRUE
+      } else {
+        note_key(game, name)
+        feed_cheats(game, name)
+      }
     }
     if (name == "ctrl") note_key(game, "ctrl")
   } else {
@@ -543,6 +565,7 @@ doom_main <- function(argv = commandArgs(trailingOnly = TRUE)) {
   video$crt <- isTRUE(game$crt)
   game$wipe <- wipe_new()
   game$cheats <- cheats_new()
+  game$am <- am_new()
   game$shown_state <- NULL
   game$title_fb <- c(video$fb)
   game$base_fb <- game$title_fb

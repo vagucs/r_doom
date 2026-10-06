@@ -1,3 +1,13 @@
+# DOOM generic portado do python_doom para R com SDL2.
+#
+# Por Wagner Nunes da Silva
+#
+# vagucs@bol.com.br
+# vagucs@vagucs.com.br
+# vagucs@gmail.com
+#
+# www.vagucs.com.br
+#
 # Carga do mapa (p_setup): geometria, BSP, things, blockmap e reject.
 # Nomes de textura ficam em texto ate o passo das texturas.
 

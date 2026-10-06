@@ -1,5 +1,7 @@
 # r_doom
 
+![DOOM running in R with SDL2](screenshot/doom.png)
+
 **Video:** [DOOM running in R](https://youtu.be/hEJqkEXS944)
 
 DOOM generic ported from **[python_doom](https://github.com/vagucs/python_doom)** to **R 4.6 + SDL2**.
@@ -27,7 +29,7 @@ Versão em português: [README.pt.md](README.pt.md)
 - Game tick: 35 Hz (`TICRATE`). Each displayed frame runs up to 4 tics
 - Renderer: BSP, visplanes, columns, spans, sprites, the weapon sprite
 - Map: VERTEXES, LINEDEFS, SIDEDEFS, SECTORS, SEGS, SSECTORS, NODES, THINGS, BLOCKMAP, REJECT
-- Play: walk, doors, lifts, switches, exit, pickups, weapons (fist, chainsaw, pistol, shotgun, chaingun, rocket, plasma, BFG), status bar, DS* sound, MUS→MIDI music, ESC menu, F1 help, intermission tally, melt wipe on a level change, monster look/chase/attack
+- Play: walk, doors, lifts, switches, exit, pickups, weapons (fist, chainsaw, pistol, shotgun, chaingun, rocket, plasma, BFG), status bar, Tab automap, DS* sound, MUS→MIDI music, ESC menu, F1 help, intermission tally, melt wipe on a level change, monster look/chase/attack
 
 You need a legal IWAD (shareware `doom1.wad` or commercial `doom.wad` / `doom2.wad`). This repository does not ship commercial WAD data.
 
@@ -38,7 +40,6 @@ Left out of this tree:
 - Network, joystick, mouse look
 - Demo playback, recording, `-timedemo`
 - Palette quantization (`-colors`, `-shades`, `-gray`, `-neogeo`)
-- Automap
 - A save file on disk (F2 / F3 open the save and load screens)
 
 ---
@@ -165,7 +166,8 @@ Classic DOOM controls. Movement is **arrow keys only**, so letter keys stay free
 | **Esc** | Menu |
 | **F1** | Help (`HELP2` when the WAD has it) |
 | **F2** / **F3** | Save screen / load screen |
-| **-** / **=** | Smaller / larger 3D view |
+| **Tab** | Toggle the automap. **F** follows the player, **G** toggles the grid, arrows pan when follow is off |
+| **-** / **=** | Zoom the automap when it is open; otherwise a smaller / larger 3D view |
 | **Alt+Enter** | Fullscreen |
 
 **Screen Size** and **Graphic Detail** (HIGH/LOW) in the options menu change the 3D view. LOW draws half the columns and doubles each one. The weapon stays centered.
@@ -182,7 +184,7 @@ Type these during a level, with the menu closed. No Enter. On Nightmare skill on
 | **IDKFA** | All weapons, ammo, keys, and armor |
 | **IDFA** | Weapons, ammo, and armor |
 | **IDCLIP** / **IDSPISPOPD** | No clipping |
-| **IDDT** | Accepted; this tree has no automap |
+| **IDDT** | With the automap open: all walls, then things, then back |
 | **IDBEHOLD** | Lists the power-ups; then **V** **S** **I** **R** **A** **L** |
 | **IDCHOPPERS** | Chainsaw |
 | **IDMYPOS** | Coordinates and angle |
@@ -247,6 +249,7 @@ R/                   engine
 | `R/wi.R` | `doom/wi_stuff.py` |
 | `R/wipe.R` | `doom/wipe.py` |
 | `R/cheats.R` | cheat machine in `doom/game.py` |
+| `R/am_map.R` | `doom/am_map.py` |
 | `R/game.R` | `doom/game.py` |
 | `src/rdoom_sdl.c` | pygame window, blit, mixer, and the CRT present |
 

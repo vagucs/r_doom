@@ -1,3 +1,13 @@
+# DOOM generic portado do python_doom para R com SDL2.
+#
+# Por Wagner Nunes da Silva
+#
+# vagucs@bol.com.br
+# vagucs@vagucs.com.br
+# vagucs@gmail.com
+#
+# www.vagucs.com.br
+#
 # Janela SDL2. O framebuffer continua raw(320 * 200), um indice de PLAYPAL por pixel.
 
 sdl_state <- new.env(parent = emptyenv())

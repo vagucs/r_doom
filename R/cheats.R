@@ -1,3 +1,13 @@
+# DOOM generic portado do python_doom para R com SDL2.
+#
+# Por Wagner Nunes da Silva
+#
+# vagucs@bol.com.br
+# vagucs@vagucs.com.br
+# vagucs@gmail.com
+#
+# www.vagucs.com.br
+#
 # Sequencias do DOOM: iddqd, idkfa, idclip, idclev, idmus e as demais.
 
 cheat_new <- function(action, sequence, param_chars = 0L) {
@@ -171,6 +181,8 @@ do_cheat <- function(game, action, param) {
     player$pendingweapon <- WP_CHAINSAW
     player$powers[PW_INVULNERABILITY + 1L] <- 1
     set_player_message(player, "MOTOSSERRA")
+  } else if (action == "iddt") {
+    if (am_cycle(game$am)) game$menu$dirty <- TRUE
   } else if (action == "mypos") cheat_mypos(player)
   else if (action == "clev") cheat_clev(game, param)
   else if (action == "mus") cheat_mus(game, param)

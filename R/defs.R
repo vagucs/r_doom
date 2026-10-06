@@ -1,3 +1,13 @@
+# DOOM generic portado do python_doom para R com SDL2.
+#
+# Por Wagner Nunes da Silva
+#
+# vagucs@bol.com.br
+# vagucs@vagucs.com.br
+# vagucs@gmail.com
+#
+# www.vagucs.com.br
+#
 # DOOM em R, a partir do python_doom.
 # Constantes de doomdef / doomdata (indices 0-based, como no C).
 
@@ -53,6 +63,8 @@ FIELDOFVIEW <- 2048L
 
 ML_DONTPEGTOP <- 8L
 ML_DONTPEGBOTTOM <- 16L
+ML_SECRET <- 32L
+ML_DONTDRAW <- 128L
 ML_MAPPED <- 256L
 
 SIL_NONE <- 0L

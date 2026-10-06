@@ -1,3 +1,13 @@
+# DOOM generic portado do python_doom para R com SDL2.
+#
+# Por Wagner Nunes da Silva
+#
+# vagucs@bol.com.br
+# vagucs@vagucs.com.br
+# vagucs@gmail.com
+#
+# www.vagucs.com.br
+#
 # Menu do Doom: Novo Jogo, Opcoes, Load, Save, Leia isto, Sair.
 # Teclas no nome que o device windows() entrega.
 

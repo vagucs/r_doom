@@ -1,5 +1,7 @@
 # r_doom
 
+![DOOM rodando em R com SDL2](screenshot/doom.png)
+
 **Vídeo:** [DOOM rodando em R](https://youtu.be/hEJqkEXS944)
 
 DOOM generic portado de **[python_doom](https://github.com/vagucs/python_doom)** para **R 4.6 + SDL2**.
@@ -27,7 +29,7 @@ O `python_doom` é um motor de DOOM condensado e jogável, em Python. Este diret
 - Tic do jogo: 35 Hz (`TICRATE`). Cada quadro desenhado roda até 4 tics
 - Renderer: BSP, visplanes, colunas, spans, sprites, o sprite da arma
 - Mapa: VERTEXES, LINEDEFS, SIDEDEFS, SECTORS, SEGS, SSECTORS, NODES, THINGS, BLOCKMAP, REJECT
-- Jogo: andar, portas, plataformas, interruptores, saída, itens, armas (punho, motosserra, pistola, shotgun, chaingun, foguete, plasma, BFG), barra de status, som DS*, música MUS→MIDI, menu ESC, ajuda no F1, totalização no intermission, tela derretendo na troca de fase, inimigos em look/chase/ataque
+- Jogo: andar, portas, plataformas, interruptores, saída, itens, armas (punho, motosserra, pistola, shotgun, chaingun, foguete, plasma, BFG), barra de status, automapa no Tab, som DS*, música MUS→MIDI, menu ESC, ajuda no F1, totalização no intermission, tela derretendo na troca de fase, inimigos em look/chase/ataque
 
 É necessário um IWAD legal (shareware `doom1.wad` ou comercial `doom.wad` / `doom2.wad`). Este repositório não distribui WAD comercial.
 
@@ -38,7 +40,6 @@ O que fica de fora:
 - Rede, joystick, mouse para olhar
 - Demo, gravação e `-timedemo`
 - Quantização de paleta (`-colors`, `-shades`, `-gray`, `-neogeo`)
-- Automap
 - Arquivo de save em disco (F2 / F3 abrem as telas de salvar e carregar)
 
 ---
@@ -165,7 +166,8 @@ Controles clássicos do DOOM. O movimento usa **somente as setas**, para as letr
 | **Esc** | Menu |
 | **F1** | Ajuda (`HELP2` quando o WAD tem) |
 | **F2** / **F3** | Tela de salvar / tela de carregar |
-| **-** / **=** | Vista 3D menor / maior |
+| **Tab** | Abre e fecha o automapa. **F** segue o jogador, **G** liga a grade, setas deslocam o mapa com o follow desligado |
+| **-** / **=** | Zoom do automapa quando ele está aberto; senão, vista 3D menor / maior |
 | **Alt+Enter** | Tela cheia |
 
 **Screen Size** e **Graphic Detail** (HIGH/LOW), no menu de opções, mudam a vista 3D. LOW desenha metade das colunas e duplica cada uma. A arma fica no centro.
@@ -182,7 +184,7 @@ Digite durante a fase, com o menu fechado. Sem Enter. No skill Nightmare só **I
 | **IDKFA** | Todas as armas, munição, chaves e armadura |
 | **IDFA** | Armas, munição e armadura |
 | **IDCLIP** / **IDSPISPOPD** | Sem colisão |
-| **IDDT** | Aceito; esta árvore não tem automap |
+| **IDDT** | Com o automapa aberto: todas as paredes, depois os things, depois volta |
 | **IDBEHOLD** | Lista os power-ups; em seguida **V** **S** **I** **R** **A** **L** |
 | **IDCHOPPERS** | Motosserra |
 | **IDMYPOS** | Coordenadas e ângulo |
@@ -247,6 +249,7 @@ R/                   motor
 | `R/wi.R` | `doom/wi_stuff.py` |
 | `R/wipe.R` | `doom/wipe.py` |
 | `R/cheats.R` | máquina de cheats em `doom/game.py` |
+| `R/am_map.R` | `doom/am_map.py` |
 | `R/game.R` | `doom/game.py` |
 | `src/rdoom_sdl.c` | janela, blit, mixer e o CRT do pygame |
 
