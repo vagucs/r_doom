@@ -160,7 +160,13 @@ enemy_init <- function(game) {
     if (is.null(typ)) next
     prepare_mo(mo, typ, game)
     st <- MOBJINFO[[typ + 1L]]$spawnstate
-    if (st != S_NULL) set_mobj_state(mo, st, game$world, game)
+    if (!is.null(st) && st != S_NULL) {
+      row <- STATES[st + 1L, ]
+      mo$istate <- st
+      mo$tics <- row[3]
+      mo$sprite <- SPRNAMES[row[1] + 1L]
+      mo$frame <- row[2]
+    }
   }
   invisible(game)
 }
@@ -262,7 +268,14 @@ spawn_mobj <- function(world, x, y, z, typ, game = NULL) {
   }
   world$mobjs[[length(world$mobjs) + 1L]] <- mo
   set_thing_position(world, mo)
-  set_mobj_state(mo, info$spawnstate, world, game)
+  st <- info$spawnstate
+  if (!is.null(st)) {
+    row <- STATES[st + 1L, ]
+    mo$istate <- st
+    mo$tics <- row[3]
+    mo$sprite <- SPRNAMES[row[1] + 1L]
+    mo$frame <- row[2]
+  }
   mo
 }
 
@@ -626,6 +639,28 @@ spawn_player_missile <- function(world, source, typ, game) {
   mo
 }
 
+missile_victim <- function(world, mo) {
+  spots <- list(c(mo$x, mo$y, mo$z))
+  tx <- if (is.null(mo$tmx)) mo$x else mo$tmx
+  ty <- if (is.null(mo$tmy)) mo$y else mo$tmy
+  if (tx != mo$x || ty != mo$y) spots[[length(spots) + 1L]] <- c(tx, ty, mo$z)
+  best <- NULL
+  best_dist <- 2147483647
+  for (other in world$mobjs) {
+    if (!is.null(mo$target) && same_species(mo$target, other) && !identical(other, mo$target) &&
+        (is.null(other$type) || other$type != MT_PLAYER)) next
+    for (spot in spots) {
+      if (!missile_reaches(mo, other, spot[1], spot[2], spot[3])) next
+      dist <- max(abs(other$x - spot[1]), abs(other$y - spot[2]))
+      if (dist < best_dist) {
+        best_dist <- dist
+        best <- other
+      }
+    }
+  }
+  best
+}
+
 spawn_missile_mt <- function(world, source, dest, typ, game, ang = NULL) {
   info <- MOBJINFO[[typ + 1L]]
   speed <- info$speed
@@ -648,6 +683,8 @@ spawn_missile_mt <- function(world, source, dest, typ, game, ang = NULL) {
 }
 
 explode_missile <- function(world, mo, game, hit) {
+  if (is.null(hit)) hit <- if (!is.null(mo$struck)) mo$struck else missile_victim(world, mo)
+  mo$struck <- NULL
   if (!is.null(hit) && !is.null(game)) {
     src <- if (!is.null(mo$target)) mo$target else mo
     dmg <- if (!is.null(mo$damage) && mo$damage) mo$damage else mi(mo)$damage

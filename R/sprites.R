@@ -154,6 +154,7 @@ draw_sprites <- function(r, world) {
   vis <- list()
   for (mo in world$mobjs) {
     if (!nzchar(mo$sprite)) next
+    if (has_flag(mo$flags, MF_NOSECTOR)) next
     item <- project_sprite(r, mo)
     if (!is.null(item)) vis[[length(vis) + 1L]] <- item
   }

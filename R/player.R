@@ -76,7 +76,7 @@ weapon_atk <- function(weapon) {
   } else if (weapon == WP_MISSILE) {
     list(c("MISGB0", 8, 0, "MISFA0", 15, 1), c("MISGB0", 12, 1, "", 0, 2))
   } else if (weapon == WP_PLASMA) {
-    list(c("PLSGA0", 3, 1, "PLSFA0", 4, 1), c("PLSGB0", 20, 0))
+    list(c("PLSGA0", 3, 1, "PLSFA0", 4, 1), c("PLSGB0", 20, 0, "", 0, 0, 1))
   } else if (weapon == WP_BFG) {
     list(
       c("BFGGA0", 20, 0), c("BFGGB0", 10, 0, "BFGFA0", 17, 1),
@@ -104,6 +104,7 @@ spawn_player <- function(world, start) {
   mo$floorz <- sub$sector$floorheight
   mo$ceilingz <- sub$sector$ceilingheight
   mo$flags <- MF_SOLID + MF_SHOOTABLE + MF_PICKUP + MF_DROPOFF
+  mo$type <- 0L
   mo$health <- 100
   mo$sprite <- "PLAY"
   mo$frame <- 0L
@@ -588,6 +589,11 @@ enter_atk_step <- function(player, game, firing, can_fire) {
       return(invisible())
     }
     step <- seq[[player$psprite_step + 1L]]
+    if (length(step) >= 7L && as.integer(step[[7]]) != 0L && firing && can_fire &&
+        player$pendingweapon == WP_NOCHANGE && player$health > 0) {
+      player$psprite_step <- 0L
+      next
+    }
     player$psprite_body <- step[[1]]
     player$psprite_tics <- as.integer(step[[2]])
     if (length(step) >= 6L && as.integer(step[[5]]) > 0L) {
@@ -621,7 +627,10 @@ do_shot <- function(player, game) {
   }
   mo <- player$mo
   if (weapon == WP_MISSILE || weapon == WP_PLASMA || weapon == WP_BFG) {
-    if (weapon == WP_PLASMA) bitwAnd(p_random(), 1L)
+    if (weapon == WP_PLASMA) {
+      player$psprite_flash <- if (bitwAnd(p_random(), 1L) != 0L) "PLSFB0" else "PLSFA0"
+      player$flash_tics <- 4L
+    }
     kind <- if (weapon == WP_MISSILE) MT_ROCKET else if (weapon == WP_PLASMA) MT_PLASMA else MT_BFG
     spawn_player_missile(game$world, mo, kind, game)
     game$start_sound(if (weapon == WP_MISSILE) "rlaunc" else if (weapon == WP_PLASMA) "plasma" else "bfg")

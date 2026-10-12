@@ -512,11 +512,21 @@ vertical_door <- function(s, line, thing) {
     dtype <- VLD_OPEN
     line$special <- 0L
   } else if (spec == 117L) dtype <- VLD_BLAZERAISE
-  else if (spec %in% c(118L, 99L, 133L, 134L, 135L, 136L, 137L)) {
+  else if (spec == 118L) {
     dtype <- VLD_BLAZEOPEN
     line$special <- 0L
   } else dtype <- VLD_NORMAL
   spawn_door(s, sec, dtype)
+}
+
+locked_blaze_door <- function(s, line, thing, spec) {
+  player <- thing$player
+  if (is.null(player)) return(invisible())
+  if (need_key(s, player, spec)) return(invisible())
+  if (isTRUE(do_door(s, line, VLD_BLAZEOPEN))) {
+    change_switch(s, line, if (spec %in% c(99L, 134L, 136L)) 1L else 0L)
+  }
+  invisible()
 }
 
 start_floor <- function(s, sec, dest, direction, speed, crush = FALSE, floorpic = NULL) {
@@ -815,8 +825,12 @@ change_switch <- function(s, line, use_again) {
 specials_use <- function(s, line, thing, side) {
   if (side != 0L) return(FALSE)
   spec <- line$special
-  if (spec %in% c(1L, 26L, 27L, 28L, 31L, 32L, 33L, 34L, 99L, 117L, 118L, 133L, 134L, 135L, 136L, 137L)) {
+  if (spec %in% c(1L, 26L, 27L, 28L, 31L, 32L, 33L, 34L, 117L, 118L)) {
     vertical_door(s, line, thing)
+    return(TRUE)
+  }
+  if (spec %in% c(99L, 133L, 134L, 135L, 136L, 137L)) {
+    locked_blaze_door(s, line, thing, spec)
     return(TRUE)
   }
   if (spec == 11L) {
@@ -844,7 +858,7 @@ specials_use <- function(s, line, thing, side) {
   else if (spec == 23L) ok <- do_floor(s, line, spec_lowest_floor, -1L)
   else if (spec == 71L) ok <- do_floor(s, line, spec_highest_floor, -1L)
   else if (spec == 101L) ok <- do_floor(s, line, spec_raise_dest, 1L)
-  else if (spec == 102L) ok <- do_floor(s, line, function(sec) sec$floorheight - 8 * FRACUNIT, -1L)
+  else if (spec == 102L) ok <- do_floor(s, line, spec_highest_floor, -1L)
   else if (spec == 7L) ok <- do_stairs(s, line, 8 * FRACUNIT, FLOORSPEED / 4)
   else if (spec == 127L) ok <- do_stairs(s, line, 16 * FRACUNIT, FLOORSPEED * 4)
   else if (spec == 41L) ok <- do_crusher(s, line, CEIL_LOWERTOFLOOR)
@@ -864,7 +878,7 @@ specials_use <- function(s, line, thing, side) {
   else if (spec == 115L) { ok <- do_door(s, line, VLD_BLAZEOPEN); again <- TRUE }
   else if (spec == 116L) { ok <- do_door(s, line, VLD_BLAZECLOSE); again <- TRUE }
   else if (spec %in% c(120L, 123L)) { ok <- do_plat(s, line, TRUE); again <- TRUE }
-  else if (spec == 45L) { ok <- do_floor(s, line, function(sec) sec$floorheight - 8 * FRACUNIT, -1L); again <- TRUE }
+  else if (spec == 45L) { ok <- do_floor(s, line, spec_highest_floor, -1L); again <- TRUE }
   else if (spec == 60L) { ok <- do_floor(s, line, spec_lowest_floor, -1L); again <- TRUE }
   else if (spec == 64L) { ok <- do_floor(s, line, spec_raise_dest, 1L); again <- TRUE }
   else if (spec == 70L) { ok <- do_floor(s, line, spec_highest_floor, -1L, FLOORSPEED * 4); again <- TRUE }

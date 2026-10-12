@@ -110,6 +110,24 @@ check_sight <- function(world, t1, t2) {
   TRUE
 }
 
+missile_reaches <- function(mo, other, x, y, z) {
+  if (identical(other, mo) || identical(other, mo$target)) return(FALSE)
+  if (is.null(other$health) || other$health <= 0) return(FALSE)
+  if (!has_flag(other$flags, MF_SHOOTABLE)) return(FALSE)
+  reach <- other$radius + mo$radius
+  if (abs(other$x - x) >= reach || abs(other$y - y) >= reach) return(FALSE)
+  slack <- 64 * FRACUNIT
+  momz <- if (is.null(mo$momz)) 0 else mo$momz
+  z1 <- z + momz
+  low <- min(z, z1) - slack
+  high <- max(z, z1) + mo$height + slack
+  if (!is.null(mo$floorz) && z <= mo$floorz) {
+    low <- min(low, mo$floorz - slack)
+    high <- max(high, mo$floorz + slack)
+  }
+  low <= other$z + other$height && high >= other$z
+}
+
 line_opening <- function(line) {
   if (is.null(line$backsector)) return(c(0, 0, 0))
   front <- line$frontsector
@@ -234,15 +252,13 @@ pit_thing <- function(world, tm, other, game) {
     return(FALSE)
   }
   if (has_flag(tm$flags, MF_MISSILE)) {
-    if (tm$z > other$z + other$height || tm$z + tm$height < other$z) return(TRUE)
     if (!is.null(tm$target) && same_species(tm$target, other)) {
       if (identical(other, tm$target)) return(TRUE)
       if (is.null(other$type) || other$type != MT_PLAYER) return(FALSE)
     }
     if (!has_flag(other$flags, MF_SHOOTABLE)) return(!has_flag(other$flags, MF_SOLID))
-    dmg <- ((p_random() %% 8) + 1) * (if (is.null(tm$damage)) 0 else tm$damage)
-    src <- if (!is.null(tm$target)) tm$target else tm
-    if (!is.null(game)) game$damage_mobj(other, src, dmg, tm)
+    if (!missile_reaches(tm, other, tm$tmx, tm$tmy, tm$z)) return(TRUE)
+    tm$struck <- other
     return(FALSE)
   }
   if (has_flag(other$flags, MF_SPECIAL)) {
@@ -588,6 +604,48 @@ path_traverse <- function(world, x1, y1, x2, y2, flags, trav) {
   TRUE
 }
 
+slide_blocks <- function(thing, li) {
+  if (!has_flag(li$flags, ML_TWOSIDED) || is.null(li$backsector)) {
+    return(point_on_line_side(thing$x, thing$y, li) == 0L)
+  }
+  open <- line_opening(li)
+  if (open[1] - open[2] < thing$height) return(TRUE)
+  if (open[1] - thing$z < thing$height) return(TRUE)
+  if (open[2] - thing$z > 24 * FRACUNIT) return(TRUE)
+  has_flag(li$flags, ML_BLOCKING)
+}
+
+intercept_frac <- function(x1, y1, x2, y2, line) {
+  u <- as.numeric(FRACUNIT)
+  ax <- x1 / u
+  ay <- y1 / u
+  bx <- x2 / u
+  by <- y2 / u
+  cx <- line$v1$x / u
+  cy <- line$v1$y / u
+  dx <- line$v2$x / u
+  dy <- line$v2$y / u
+  den <- (bx - ax) * (dy - cy) - (by - ay) * (dx - cx)
+  if (abs(den) < 1e-8) return(-1L)
+  t <- ((cx - ax) * (dy - cy) - (cy - ay) * (dx - cx)) / den
+  v <- ((cx - ax) * (by - ay) - (cy - ay) * (bx - ax)) / den
+  if (t < 0 || t > 1 || v < 0 || v > 1) return(-1L)
+  as.integer(trunc(t * u))
+}
+
+trace_slide_corner <- function(world, thing, x1, y1, x2, y2, best) {
+  for (ln in world$lines) {
+    frac <- intercept_frac(x1, y1, x2, y2, ln)
+    if (frac < 0L || frac > FRACUNIT) next
+    if (!slide_blocks(thing, ln)) next
+    if (frac < best$frac) {
+      best$frac <- frac
+      best$line <- ln
+    }
+  }
+  invisible()
+}
+
 slide_move <- function(world, thing, momx, momy, game = NULL) {
   if (abs(momx) > MAXMOVE) momx <- if (momx > 0) MAXMOVE else -MAXMOVE
   if (abs(momy) > MAXMOVE) momy <- if (momy > 0) MAXMOVE else -MAXMOVE
@@ -619,30 +677,11 @@ slide_move <- function(world, thing, momx, momy, game = NULL) {
     best <- new.env(parent = emptyenv())
     best$frac <- FRACUNIT + 1
     best$line <- NULL
-    slide_trav <- function(inn, st) {
-      li <- inn$line
-      blocking <- FALSE
-      if (!has_flag(li$flags, ML_TWOSIDED)) {
-        if (point_on_line_side(thing$x, thing$y, li) != 0L) return(TRUE)
-        blocking <- TRUE
-      } else {
-        open <- line_opening(li)
-        if (open[1] - open[2] < thing$height) blocking <- TRUE
-        else if (open[1] - thing$z < thing$height) blocking <- TRUE
-        else if (open[2] - thing$z > 24 * FRACUNIT) blocking <- TRUE
-      }
-      if (!blocking) return(TRUE)
-      if (inn$frac < best$frac) {
-        best$frac <- inn$frac
-        best$line <- li
-      }
-      FALSE
-    }
     mx <- thing$momx
     my <- thing$momy
-    path_traverse(world, leadx, leady, leadx + mx, leady + my, PT_ADDLINES, slide_trav)
-    path_traverse(world, trailx, leady, trailx + mx, leady + my, PT_ADDLINES, slide_trav)
-    path_traverse(world, leadx, traily, leadx + mx, traily + my, PT_ADDLINES, slide_trav)
+    trace_slide_corner(world, thing, leadx, leady, leadx + mx, leady + my, best)
+    trace_slide_corner(world, thing, trailx, leady, trailx + mx, leady + my, best)
+    trace_slide_corner(world, thing, leadx, traily, leadx + mx, traily + my, best)
     if (best$frac == FRACUNIT + 1 || is.null(best$line)) {
       if (!try_move(world, thing, thing$x, thing$y + thing$momy, game)) {
         try_move(world, thing, thing$x + thing$momx, thing$y, game)
